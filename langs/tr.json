@@ -20,5 +20,5 @@
   "emote_not_found": "❌ '{query}' adında emote bulunamadı.",
   "emote_usage": "❌ Kullanım: !emote <numara/isim> veya !emote list",
   "emote_stopped": "⏹️ Emote durduruldu.",
-  "emote_started": "🎭 {user} şu anda {name} emotu kullanıyor! Durdurmak için stop veya dur yaz."
+  "emote_started": "🎭 Şu anda {name} emotunu kullanıyorsun! Durdurmak için stop veya dur yaz."
 }

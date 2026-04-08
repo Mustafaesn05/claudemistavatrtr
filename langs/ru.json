@@ -20,5 +20,5 @@
   "emote_not_found": "❌ Эмоция '{query}' не найдена.",
   "emote_usage": "❌ Использование: !emote <номер/имя> или !emote list",
   "emote_stopped": "⏹️ Эмоция остановлена.",
-  "emote_started": "🎭 {user} сейчас использует эмоцию {name}! Напишите stop для остановки."
+  "emote_started": "🎭 Вы сейчас используете эмоцию {name}! Напишите stop для остановки."
 }

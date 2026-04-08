@@ -20,5 +20,5 @@
   "emote_not_found": "❌ لم يتم العثور على الإيموت '{query}'.",
   "emote_usage": "❌ الاستخدام: !emote <رقم/اسم> أو !emote list",
   "emote_stopped": "⏹️ تم إيقاف الإيموت.",
-  "emote_started": "🎭 {user} يستخدم الآن إيموت {name}! اكتب stop للإيقاف."
+  "emote_started": "🎭 أنت تستخدم الآن إيموت {name}! اكتب stop للإيقاف."
 }
