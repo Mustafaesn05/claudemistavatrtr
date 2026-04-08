@@ -18,5 +18,6 @@
   "lang_usage": "❌ Verwendung: !lang tr/en/ar/ru/de",
   "lang_invalid": "❌ Ungültige Sprache. Unterstützt: tr, en, ar, ru, de",
   "emote_not_found": "❌ Emote '{query}' nicht gefunden.",
-  "emote_usage": "❌ Verwendung: !emote <Nummer/Name> oder !emote list"
+  "emote_usage": "❌ Verwendung: !emote <Nummer/Name> oder !emote list",
+  "emote_stopped": "⏹️ Emote gestoppt."
 }

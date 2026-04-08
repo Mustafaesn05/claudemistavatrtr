@@ -92,6 +92,11 @@ def find_emote(query):
 
 
 class Bot(BaseBot):
+    def __init__(self):
+        super().__init__()
+        # user_id -> asyncio.Task (loop halinde emote gönderen task)
+        self.emote_loops = {}
+
     async def on_start(self, session_metadata):
         print("Bot odaya katıldı!")
 
@@ -108,14 +113,41 @@ class Bot(BaseBot):
         else:
             await self.highrise.chat(f"{user.username}, {welcome_text}")
 
+    async def _emote_loop(self, user_id, emote_id):
+        """Emote'u sürekli loop halinde gönderir, iptal edilene kadar."""
+        try:
+            while True:
+                await self.highrise.send_emote(emote_id, user_id)
+                await asyncio.sleep(4)
+        except asyncio.CancelledError:
+            pass
+
+    def _start_emote_loop(self, user_id, emote_id):
+        """Kullanıcı için emote loop başlat, varsa öncekini iptal et."""
+        if user_id in self.emote_loops:
+            self.emote_loops[user_id].cancel()
+        task = asyncio.create_task(self._emote_loop(user_id, emote_id))
+        self.emote_loops[user_id] = task
+
+    def _stop_emote_loop(self, user_id):
+        """Kullanıcının emote loop'unu durdur."""
+        if user_id in self.emote_loops:
+            self.emote_loops[user_id].cancel()
+            del self.emote_loops[user_id]
+
     async def on_chat(self, user, message):
         msg = message.strip()
 
+        # stop/dur komutu — emote loop'u durdur
+        if msg.lower() in ("stop", "dur"):
+            self._stop_emote_loop(user.id)
+            return
+
         if not msg.startswith("!"):
-            # Sayı veya emote ismi yazıldıysa emote gönder
+            # Sayı veya emote ismi yazıldıysa emote loop başlat
             emote = find_emote(msg)
             if emote:
-                await self.highrise.send_emote(emote["id"], user.id)
+                self._start_emote_loop(user.id, emote["id"])
             return
 
         parts = msg.split(None, 2)
@@ -127,12 +159,12 @@ class Bot(BaseBot):
                 await self._send_emote_list()
                 return
 
-            # !emote <numara/isim> — emote gönder
+            # !emote <numara/isim> — emote loop başlat
             if len(parts) >= 2:
                 query = parts[1]
                 emote = find_emote(query)
                 if emote:
-                    await self.highrise.send_emote(emote["id"], user.id)
+                    self._start_emote_loop(user.id, emote["id"])
                 else:
                     await self.highrise.chat(t("emote_not_found", query=query))
                 return
@@ -303,6 +335,7 @@ class Bot(BaseBot):
             await asyncio.sleep(0.5)
 
     async def on_user_leave(self, user):
+        self._stop_emote_loop(user.id)
         print(f"{user.username} odadan ayrıldı.")
 
 
