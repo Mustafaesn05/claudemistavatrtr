@@ -142,6 +142,7 @@ class Bot(BaseBot):
         # stop/dur komutu — emote loop'u durdur
         if msg.lower() in ("stop", "dur"):
             self._stop_emote_loop(user.id)
+            await self.highrise.send_whisper(user.id, t("emote_stopped"))
             return
 
         if not msg.startswith("!"):
@@ -158,7 +159,7 @@ class Bot(BaseBot):
         # --- !emote komutu ---
         if cmd == "!emote":
             if len(parts) >= 2 and parts[1].lower() == "list":
-                await self._send_emote_list()
+                await self._send_emote_list(user.id)
                 return
 
             # !emote <numara/isim> — emote loop başlat
@@ -169,38 +170,38 @@ class Bot(BaseBot):
                     self._start_emote_loop(user.id, emote)
                     await self.highrise.send_whisper(user.id, t("emote_started", name=emote["name"]))
                 else:
-                    await self.highrise.chat(t("emote_not_found", query=query))
+                    await self.highrise.send_whisper(user.id, t("emote_not_found", query=query))
                 return
 
-            await self.highrise.chat(t("emote_usage"))
+            await self.highrise.send_whisper(user.id, t("emote_usage"))
             return
 
         # --- !lang komutu (sadece host) ---
         if cmd == "!lang":
             if not is_host(user.username):
-                await self.highrise.chat(t("host_only"))
+                await self.highrise.send_whisper(user.id, t("host_only"))
                 return
 
             if len(parts) < 2:
-                await self.highrise.chat(t("lang_usage"))
+                await self.highrise.send_whisper(user.id, t("lang_usage"))
                 return
 
             lang_code = parts[1].lower()
             if lang_code not in SUPPORTED_LANGS:
-                await self.highrise.chat(t("lang_invalid"))
+                await self.highrise.send_whisper(user.id, t("lang_invalid"))
                 return
 
             settings = load_settings()
             settings["lang"] = lang_code
             settings["welcome_message"] = ""
             save_settings(settings)
-            await self.highrise.chat(t("lang_changed"))
+            await self.highrise.send_whisper(user.id, t("lang_changed"))
             return
 
         # --- !welcome komutu (sadece host) ---
         if cmd == "!welcome":
             if not is_host(user.username):
-                await self.highrise.chat(t("host_only"))
+                await self.highrise.send_whisper(user.id, t("host_only"))
                 return
 
             if len(parts) < 2:
@@ -209,7 +210,7 @@ class Bot(BaseBot):
                 if not current_msg:
                     current_msg = t("welcome_default")
                 current_mode = settings.get("welcome_mode", "chat")
-                await self.highrise.chat(t("welcome_info", message=current_msg, mode=current_mode))
+                await self.highrise.send_whisper(user.id, t("welcome_info", message=current_msg, mode=current_mode))
                 return
 
             sub = parts[1].lower()
@@ -218,31 +219,31 @@ class Bot(BaseBot):
                 settings = load_settings()
                 settings["welcome_mode"] = "whisper"
                 save_settings(settings)
-                await self.highrise.chat(t("welcome_mode_whisper"))
+                await self.highrise.send_whisper(user.id, t("welcome_mode_whisper"))
                 return
 
             if sub == "chat":
                 settings = load_settings()
                 settings["welcome_mode"] = "chat"
                 save_settings(settings)
-                await self.highrise.chat(t("welcome_mode_chat"))
+                await self.highrise.send_whisper(user.id, t("welcome_mode_chat"))
                 return
 
             new_message = msg[len("!welcome "):]
             settings = load_settings()
             settings["welcome_message"] = new_message
             save_settings(settings)
-            await self.highrise.chat(t("welcome_updated", message=new_message))
+            await self.highrise.send_whisper(user.id, t("welcome_updated", message=new_message))
             return
 
         # --- !give komutu (sadece host) ---
         if cmd == "!give":
             if not is_host(user.username):
-                await self.highrise.chat(t("host_only"))
+                await self.highrise.send_whisper(user.id, t("host_only"))
                 return
 
             if len(parts) < 3:
-                await self.highrise.chat(t("give_usage"))
+                await self.highrise.send_whisper(user.id, t("give_usage"))
                 return
 
             target = parts[1].lstrip("@")
@@ -250,7 +251,7 @@ class Bot(BaseBot):
             valid_roles = {"host", "admin", "vip"}
             invalid = [r for r in role_list if r not in valid_roles]
             if invalid:
-                await self.highrise.chat(t("invalid_roles", roles=", ".join(invalid)))
+                await self.highrise.send_whisper(user.id, t("invalid_roles", roles=", ".join(invalid)))
                 return
 
             roles = load_roles()
@@ -264,19 +265,19 @@ class Bot(BaseBot):
             save_roles(roles)
 
             if added:
-                await self.highrise.chat(t("roles_added", target=target, roles=", ".join(added)))
+                await self.highrise.send_whisper(user.id, t("roles_added", target=target, roles=", ".join(added)))
             else:
-                await self.highrise.chat(t("roles_already", target=target))
+                await self.highrise.send_whisper(user.id, t("roles_already", target=target))
             return
 
         # --- !remove komutu (sadece host) ---
         if cmd == "!remove":
             if not is_host(user.username):
-                await self.highrise.chat(t("host_only"))
+                await self.highrise.send_whisper(user.id, t("host_only"))
                 return
 
             if len(parts) < 3:
-                await self.highrise.chat(t("remove_usage"))
+                await self.highrise.send_whisper(user.id, t("remove_usage"))
                 return
 
             target = parts[1].lstrip("@")
@@ -284,12 +285,12 @@ class Bot(BaseBot):
             valid_roles = {"host", "admin", "vip"}
             invalid = [r for r in role_list if r not in valid_roles]
             if invalid:
-                await self.highrise.chat(t("invalid_roles", roles=", ".join(invalid)))
+                await self.highrise.send_whisper(user.id, t("invalid_roles", roles=", ".join(invalid)))
                 return
 
             roles = load_roles()
             if target not in roles:
-                await self.highrise.chat(t("no_roles", target=target))
+                await self.highrise.send_whisper(user.id, t("no_roles", target=target))
                 return
 
             removed = []
@@ -302,13 +303,13 @@ class Bot(BaseBot):
             save_roles(roles)
 
             if removed:
-                await self.highrise.chat(t("roles_removed", target=target, roles=", ".join(removed)))
+                await self.highrise.send_whisper(user.id, t("roles_removed", target=target, roles=", ".join(removed)))
             else:
-                await self.highrise.chat(t("roles_not_have", target=target))
+                await self.highrise.send_whisper(user.id, t("roles_not_have", target=target))
             return
 
-    async def _send_emote_list(self):
-        """Emote listesini 256 karakteri geçmeyecek şekilde parça parça gönderir."""
+    async def _send_emote_list(self, user_id):
+        """Emote listesini 256 karakteri geçmeyecek şekilde whisper ile parça parça gönderir."""
         emotes = load_emotes()
         lines = []
         for num in sorted(emotes.keys(), key=lambda x: int(x)):
@@ -334,7 +335,7 @@ class Bot(BaseBot):
             chunks.append(current_chunk)
 
         for chunk in chunks:
-            await self.highrise.chat(chunk)
+            await self.highrise.send_whisper(user_id, chunk)
             await asyncio.sleep(0.5)
 
     async def on_user_leave(self, user):
