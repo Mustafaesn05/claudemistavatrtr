@@ -16,5 +16,7 @@
   "roles_not_have": "ℹ️ {target} hat diese Rollen nicht.",
   "lang_changed": "✅ Sprache auf Deutsch geändert.",
   "lang_usage": "❌ Verwendung: !lang tr/en/ar/ru/de",
-  "lang_invalid": "❌ Ungültige Sprache. Unterstützt: tr, en, ar, ru, de"
+  "lang_invalid": "❌ Ungültige Sprache. Unterstützt: tr, en, ar, ru, de",
+  "emote_not_found": "❌ Emote '{query}' nicht gefunden.",
+  "emote_usage": "❌ Verwendung: !emote <Nummer/Name> oder !emote list"
 }

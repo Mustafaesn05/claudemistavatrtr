@@ -16,5 +16,7 @@
   "roles_not_have": "ℹ️ {target} zaten bu rollere sahip değil.",
   "lang_changed": "✅ Dil Türkçe olarak değiştirildi.",
   "lang_usage": "❌ Kullanım: !lang tr/en/ar/ru/de",
-  "lang_invalid": "❌ Geçersiz dil. Desteklenen diller: tr, en, ar, ru, de"
+  "lang_invalid": "❌ Geçersiz dil. Desteklenen diller: tr, en, ar, ru, de",
+  "emote_not_found": "❌ '{query}' adında emote bulunamadı.",
+  "emote_usage": "❌ Kullanım: !emote <numara/isim> veya !emote list"
 }

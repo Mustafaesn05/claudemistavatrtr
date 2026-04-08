@@ -16,5 +16,7 @@
   "roles_not_have": "ℹ️ {target} لا يملك هذه الأدوار.",
   "lang_changed": "✅ تم تغيير اللغة إلى العربية.",
   "lang_usage": "❌ الاستخدام: !lang tr/en/ar/ru/de",
-  "lang_invalid": "❌ لغة غير صالحة. المدعومة: tr, en, ar, ru, de"
+  "lang_invalid": "❌ لغة غير صالحة. المدعومة: tr, en, ar, ru, de",
+  "emote_not_found": "❌ لم يتم العثور على الإيموت '{query}'.",
+  "emote_usage": "❌ الاستخدام: !emote <رقم/اسم> أو !emote list"
 }

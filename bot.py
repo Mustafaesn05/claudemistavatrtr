@@ -1,5 +1,6 @@
 import json
 import os
+import asyncio
 from highrise import BaseBot, __main__
 from highrise.models import User
 
@@ -7,6 +8,7 @@ DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 ROLES_FILE = os.path.join(DATA_DIR, "roles.json")
 SETTINGS_FILE = os.path.join(DATA_DIR, "settings.json")
 LANGS_DIR = os.path.join(DATA_DIR, "langs")
+EMOTES_FILE = os.path.join(DATA_DIR, "emotes.json")
 
 SUPPORTED_LANGS = {"tr", "en", "ar", "ru", "de"}
 
@@ -48,6 +50,10 @@ def load_lang(lang_code):
     return load_json(path, {})
 
 
+def load_emotes():
+    return load_json(EMOTES_FILE, {})
+
+
 def t(key, **kwargs):
     settings = load_settings()
     lang_code = settings.get("lang", "tr")
@@ -66,6 +72,23 @@ def has_role(username, role):
 
 def is_host(username):
     return has_role(username, "host")
+
+
+def find_emote(query):
+    """Emote'u numara veya isimle bul."""
+    emotes = load_emotes()
+    query_lower = query.lower()
+
+    # Numarayla ara
+    if query in emotes:
+        return emotes[query]
+
+    # İsimle ara
+    for num, emote in emotes.items():
+        if emote["name"].lower() == query_lower:
+            return emote
+
+    return None
 
 
 class Bot(BaseBot):
@@ -89,10 +112,33 @@ class Bot(BaseBot):
         msg = message.strip()
 
         if not msg.startswith("!"):
+            # Sayı veya emote ismi yazıldıysa emote gönder
+            emote = find_emote(msg)
+            if emote:
+                await self.highrise.send_emote(emote["id"], user.id)
             return
 
         parts = msg.split(None, 2)
         cmd = parts[0].lower()
+
+        # --- !emote komutu ---
+        if cmd == "!emote":
+            if len(parts) >= 2 and parts[1].lower() == "list":
+                await self._send_emote_list()
+                return
+
+            # !emote <numara/isim> — emote gönder
+            if len(parts) >= 2:
+                query = parts[1]
+                emote = find_emote(query)
+                if emote:
+                    await self.highrise.send_emote(emote["id"], user.id)
+                else:
+                    await self.highrise.chat(t("emote_not_found", query=query))
+                return
+
+            await self.highrise.chat(t("emote_usage"))
+            return
 
         # --- !lang komutu (sadece host) ---
         if cmd == "!lang":
@@ -111,10 +157,8 @@ class Bot(BaseBot):
 
             settings = load_settings()
             settings["lang"] = lang_code
-            # Hoş geldin mesajını sıfırla (yeni dilin default'u kullanılsın)
             settings["welcome_message"] = ""
             save_settings(settings)
-            # Yeni dilde onay mesajı
             await self.highrise.chat(t("lang_changed"))
             return
 
@@ -149,7 +193,6 @@ class Bot(BaseBot):
                 await self.highrise.chat(t("welcome_mode_chat"))
                 return
 
-            # !welcome <mesaj>
             new_message = msg[len("!welcome "):]
             settings = load_settings()
             settings["welcome_message"] = new_message
@@ -228,6 +271,36 @@ class Bot(BaseBot):
             else:
                 await self.highrise.chat(t("roles_not_have", target=target))
             return
+
+    async def _send_emote_list(self):
+        """Emote listesini 256 karakteri geçmeyecek şekilde parça parça gönderir."""
+        emotes = load_emotes()
+        lines = []
+        for num in sorted(emotes.keys(), key=lambda x: int(x)):
+            emote = emotes[num]
+            lines.append(f"{num}. {emote['name']}")
+
+        chunks = []
+        current_chunk = ""
+        for line in lines:
+            if current_chunk:
+                test = current_chunk + "\n" + line
+            else:
+                test = line
+
+            if len(test) <= 256:
+                current_chunk = test
+            else:
+                if current_chunk:
+                    chunks.append(current_chunk)
+                current_chunk = line
+
+        if current_chunk:
+            chunks.append(current_chunk)
+
+        for chunk in chunks:
+            await self.highrise.chat(chunk)
+            await asyncio.sleep(0.5)
 
     async def on_user_leave(self, user):
         print(f"{user.username} odadan ayrıldı.")
