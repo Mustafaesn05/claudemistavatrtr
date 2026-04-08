@@ -149,6 +149,7 @@ class Bot(BaseBot):
             emote = find_emote(msg)
             if emote:
                 self._start_emote_loop(user.id, emote)
+                await self.highrise.chat(t("emote_started", user=user.username, name=emote["name"]))
             return
 
         parts = msg.split(None, 2)
@@ -166,6 +167,7 @@ class Bot(BaseBot):
                 emote = find_emote(query)
                 if emote:
                     self._start_emote_loop(user.id, emote)
+                    await self.highrise.chat(t("emote_started", user=user.username, name=emote["name"]))
                 else:
                     await self.highrise.chat(t("emote_not_found", query=query))
                 return

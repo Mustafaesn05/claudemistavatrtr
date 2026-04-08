@@ -19,5 +19,6 @@
   "lang_invalid": "❌ Неверный язык. Поддерживаемые: tr, en, ar, ru, de",
   "emote_not_found": "❌ Эмоция '{query}' не найдена.",
   "emote_usage": "❌ Использование: !emote <номер/имя> или !emote list",
-  "emote_stopped": "⏹️ Эмоция остановлена."
+  "emote_stopped": "⏹️ Эмоция остановлена.",
+  "emote_started": "🎭 {user} сейчас использует эмоцию {name}! Напишите stop для остановки."
 }

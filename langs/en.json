@@ -19,5 +19,6 @@
   "lang_invalid": "❌ Invalid language. Supported: tr, en, ar, ru, de",
   "emote_not_found": "❌ Emote '{query}' not found.",
   "emote_usage": "❌ Usage: !emote <number/name> or !emote list",
-  "emote_stopped": "⏹️ Emote stopped."
+  "emote_stopped": "⏹️ Emote stopped.",
+  "emote_started": "🎭 {user} is now using {name} emote! Type stop to cancel."
 }
