@@ -1,0 +1,20 @@
+{
+  "lang_name": "Русский",
+  "welcome_default": "Добро пожаловать! 🎉",
+  "host_only": "❌ Только хосты могут использовать эту команду.",
+  "welcome_info": "📋 Текущее приветствие: {message}\n📋 Режим отправки: {mode}",
+  "welcome_mode_whisper": "✅ Приветствие теперь будет отправляться как шёпот.",
+  "welcome_mode_chat": "✅ Приветствие теперь будет отправляться в чат.",
+  "welcome_updated": "✅ Приветствие обновлено: {message}",
+  "give_usage": "❌ Использование: !give @имя host,admin,vip",
+  "invalid_roles": "❌ Недопустимые роли: {roles}. Допустимые: host, admin, vip",
+  "roles_added": "✅ Пользователю {target} выданы роли: {roles}.",
+  "roles_already": "ℹ️ У {target} уже есть эти роли.",
+  "remove_usage": "❌ Использование: !remove @имя host,admin,vip",
+  "no_roles": "ℹ️ У {target} нет ролей.",
+  "roles_removed": "✅ У {target} удалены роли: {roles}.",
+  "roles_not_have": "ℹ️ У {target} нет этих ролей.",
+  "lang_changed": "✅ Язык изменён на русский.",
+  "lang_usage": "❌ Использование: !lang tr/en/ar/ru/de",
+  "lang_invalid": "❌ Неверный язык. Поддерживаемые: tr, en, ar, ru, de"
+}

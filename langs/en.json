@@ -1,0 +1,20 @@
+{
+  "lang_name": "English",
+  "welcome_default": "Welcome! 🎉",
+  "host_only": "❌ Only hosts can use this command.",
+  "welcome_info": "📋 Current welcome message: {message}\n📋 Send mode: {mode}",
+  "welcome_mode_whisper": "✅ Welcome message will now be sent as whisper.",
+  "welcome_mode_chat": "✅ Welcome message will now be sent as chat.",
+  "welcome_updated": "✅ Welcome message updated: {message}",
+  "give_usage": "❌ Usage: !give @username host,admin,vip",
+  "invalid_roles": "❌ Invalid roles: {roles}. Valid: host, admin, vip",
+  "roles_added": "✅ {roles} role(s) given to {target}.",
+  "roles_already": "ℹ️ {target} already has these roles.",
+  "remove_usage": "❌ Usage: !remove @username host,admin,vip",
+  "no_roles": "ℹ️ {target} has no roles.",
+  "roles_removed": "✅ {roles} role(s) removed from {target}.",
+  "roles_not_have": "ℹ️ {target} doesn't have these roles.",
+  "lang_changed": "✅ Language changed to English.",
+  "lang_usage": "❌ Usage: !lang tr/en/ar/ru/de",
+  "lang_invalid": "❌ Invalid language. Supported: tr, en, ar, ru, de"
+}

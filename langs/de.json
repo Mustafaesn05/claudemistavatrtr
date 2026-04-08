@@ -1,0 +1,20 @@
+{
+  "lang_name": "Deutsch",
+  "welcome_default": "Willkommen! 🎉",
+  "host_only": "❌ Nur Hosts können diesen Befehl verwenden.",
+  "welcome_info": "📋 Aktuelle Willkommensnachricht: {message}\n📋 Sendemodus: {mode}",
+  "welcome_mode_whisper": "✅ Willkommensnachricht wird jetzt als Flüstern gesendet.",
+  "welcome_mode_chat": "✅ Willkommensnachricht wird jetzt im Chat gesendet.",
+  "welcome_updated": "✅ Willkommensnachricht aktualisiert: {message}",
+  "give_usage": "❌ Verwendung: !give @benutzername host,admin,vip",
+  "invalid_roles": "❌ Ungültige Rollen: {roles}. Gültig: host, admin, vip",
+  "roles_added": "✅ {target} hat die Rolle(n) {roles} erhalten.",
+  "roles_already": "ℹ️ {target} hat diese Rollen bereits.",
+  "remove_usage": "❌ Verwendung: !remove @benutzername host,admin,vip",
+  "no_roles": "ℹ️ {target} hat keine Rollen.",
+  "roles_removed": "✅ Rolle(n) {roles} von {target} entfernt.",
+  "roles_not_have": "ℹ️ {target} hat diese Rollen nicht.",
+  "lang_changed": "✅ Sprache auf Deutsch geändert.",
+  "lang_usage": "❌ Verwendung: !lang tr/en/ar/ru/de",
+  "lang_invalid": "❌ Ungültige Sprache. Unterstützt: tr, en, ar, ru, de"
+}

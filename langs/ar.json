@@ -1,0 +1,20 @@
+{
+  "lang_name": "العربية",
+  "welcome_default": "!أهلاً وسهلاً 🎉",
+  "host_only": "❌ فقط المضيفون يمكنهم استخدام هذا الأمر.",
+  "welcome_info": "📋 رسالة الترحيب الحالية: {message}\n📋 وضع الإرسال: {mode}",
+  "welcome_mode_whisper": "✅ سيتم إرسال رسالة الترحيب كرسالة خاصة.",
+  "welcome_mode_chat": "✅ سيتم إرسال رسالة الترحيب في الدردشة.",
+  "welcome_updated": "✅ تم تحديث رسالة الترحيب: {message}",
+  "give_usage": "❌ الاستخدام: !give @اسم_المستخدم host,admin,vip",
+  "invalid_roles": "❌ أدوار غير صالحة: {roles}. الصالحة: host, admin, vip",
+  "roles_added": "✅ تم منح {target} دور {roles}.",
+  "roles_already": "ℹ️ {target} لديه هذه الأدوار بالفعل.",
+  "remove_usage": "❌ الاستخدام: !remove @اسم_المستخدم host,admin,vip",
+  "no_roles": "ℹ️ {target} ليس لديه أي أدوار.",
+  "roles_removed": "✅ تم إزالة دور {roles} من {target}.",
+  "roles_not_have": "ℹ️ {target} لا يملك هذه الأدوار.",
+  "lang_changed": "✅ تم تغيير اللغة إلى العربية.",
+  "lang_usage": "❌ الاستخدام: !lang tr/en/ar/ru/de",
+  "lang_invalid": "❌ لغة غير صالحة. المدعومة: tr, en, ar, ru, de"
+}

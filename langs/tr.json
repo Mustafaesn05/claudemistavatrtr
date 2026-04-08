@@ -1,0 +1,20 @@
+{
+  "lang_name": "Türkçe",
+  "welcome_default": "Hoş geldin! 🎉",
+  "host_only": "❌ Bu komutu sadece hostlar kullanabilir.",
+  "welcome_info": "📋 Mevcut hoş geldin mesajı: {message}\n📋 Gönderim modu: {mode}",
+  "welcome_mode_whisper": "✅ Hoş geldin mesajı artık whisper olarak gönderilecek.",
+  "welcome_mode_chat": "✅ Hoş geldin mesajı artık chat olarak gönderilecek.",
+  "welcome_updated": "✅ Hoş geldin mesajı güncellendi: {message}",
+  "give_usage": "❌ Kullanım: !give @kullanıcıadı host,admin,vip",
+  "invalid_roles": "❌ Geçersiz roller: {roles}. Geçerli: host, admin, vip",
+  "roles_added": "✅ {target} kullanıcısına {roles} rolü verildi.",
+  "roles_already": "ℹ️ {target} zaten bu rollere sahip.",
+  "remove_usage": "❌ Kullanım: !remove @kullanıcıadı host,admin,vip",
+  "no_roles": "ℹ️ {target} kullanıcısının hiç rolü yok.",
+  "roles_removed": "✅ {target} kullanıcısından {roles} rolü alındı.",
+  "roles_not_have": "ℹ️ {target} zaten bu rollere sahip değil.",
+  "lang_changed": "✅ Dil Türkçe olarak değiştirildi.",
+  "lang_usage": "❌ Kullanım: !lang tr/en/ar/ru/de",
+  "lang_invalid": "❌ Geçersiz dil. Desteklenen diller: tr, en, ar, ru, de"
+}
