@@ -1,16 +1,19 @@
 import json
 import os
+import re
 import asyncio
 from highrise import BaseBot, __main__
-from highrise.models import User
+from highrise.models import User, Position
 
 DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 ROLES_FILE = os.path.join(DATA_DIR, "roles.json")
 SETTINGS_FILE = os.path.join(DATA_DIR, "settings.json")
 LANGS_DIR = os.path.join(DATA_DIR, "langs")
 EMOTES_FILE = os.path.join(DATA_DIR, "emotes.json")
+TELEPORTS_FILE = os.path.join(DATA_DIR, "teleports.json")
 
 SUPPORTED_LANGS = {"tr", "en", "ar", "ru", "de"}
+ROLE_HIERARCHY = {"vip": 1, "admin": 2, "host": 3}
 
 
 def load_json(path, default):
@@ -74,6 +77,29 @@ def is_host(username):
     return has_role(username, "host")
 
 
+def has_role_level(username, required_role):
+    """Check if user has the required role level or higher."""
+    roles = load_roles()
+    user_roles = roles.get(username, [])
+    required_level = ROLE_HIERARCHY.get(required_role, 0)
+    for role in user_roles:
+        if ROLE_HIERARCHY.get(role, 0) >= required_level:
+            return True
+    return False
+
+
+def is_admin_or_above(username):
+    return has_role_level(username, "admin")
+
+
+def load_teleports():
+    return load_json(TELEPORTS_FILE, {})
+
+
+def save_teleports(teleports):
+    save_json(TELEPORTS_FILE, teleports)
+
+
 def find_emote(query):
     """Emote'u numara veya isimle bul."""
     emotes = load_emotes()
@@ -99,6 +125,13 @@ class Bot(BaseBot):
 
     async def on_start(self, session_metadata):
         print("Bot odaya katıldı!")
+        settings = load_settings()
+        bot_spawn = settings.get("bot_spawn")
+        if bot_spawn:
+            try:
+                await self.highrise.walk_to(Position(bot_spawn["x"], bot_spawn["y"], bot_spawn["z"]))
+            except Exception:
+                pass
 
     async def on_user_join(self, user):
         settings = load_settings()
@@ -136,6 +169,22 @@ class Bot(BaseBot):
             self.emote_loops[user_id].cancel()
             del self.emote_loops[user_id]
 
+    async def _get_user_position(self, user_id):
+        """Get a user's current position in the room."""
+        response = await self.highrise.get_room_users()
+        for room_user, position in response.content:
+            if room_user.id == user_id:
+                return position
+        return None
+
+    async def _find_room_user(self, username):
+        """Find a user in the room by username."""
+        response = await self.highrise.get_room_users()
+        for room_user, position in response.content:
+            if room_user.username.lower() == username.lower():
+                return room_user, position
+        return None, None
+
     async def on_chat(self, user, message):
         msg = message.strip()
 
@@ -146,6 +195,27 @@ class Bot(BaseBot):
             return
 
         if not msg.startswith("!"):
+            # Önce teleport noktası kontrol et
+            teleports = load_teleports()
+            tele_key = None
+            for key in teleports:
+                if key.lower() == msg.lower():
+                    tele_key = key
+                    break
+
+            if tele_key:
+                tele = teleports[tele_key]
+                required_role = tele.get("role")
+                if required_role and not has_role_level(user.username, required_role):
+                    await self.highrise.send_whisper(user.id, t("tele_no_permission"))
+                    return
+                try:
+                    await self.highrise.teleport(user.id, Position(tele["x"], tele["y"], tele["z"]))
+                    await self.highrise.send_whisper(user.id, t("tele_teleported", name=tele_key))
+                except Exception:
+                    pass
+                return
+
             # Sayı veya emote ismi yazıldıysa emote loop başlat
             emote = find_emote(msg)
             if emote:
@@ -155,6 +225,187 @@ class Bot(BaseBot):
 
         parts = msg.split(None, 2)
         cmd = parts[0].lower()
+
+        # --- !create tele <ad> [(rol)] ---
+        if cmd == "!create" and len(parts) >= 2 and parts[1].lower() == "tele":
+            if not is_host(user.username):
+                await self.highrise.send_whisper(user.id, t("host_only"))
+                return
+            if len(parts) < 3:
+                await self.highrise.send_whisper(user.id, t("tele_create_usage"))
+                return
+
+            rest = parts[2].strip()
+            match = re.match(r'^(\S+)\s*\((\w+)\)$', rest)
+            if match:
+                tele_name = match.group(1).lower()
+                role = match.group(2).lower()
+                if role not in ROLE_HIERARCHY:
+                    await self.highrise.send_whisper(user.id, t("tele_invalid_role"))
+                    return
+            else:
+                tele_name = rest.split()[0].lower()
+                role = None
+
+            teleports = load_teleports()
+            if tele_name in teleports:
+                await self.highrise.send_whisper(user.id, t("tele_exists", name=tele_name))
+                return
+
+            position = await self._get_user_position(user.id)
+            if not position:
+                return
+
+            teleports[tele_name] = {
+                "x": position.x,
+                "y": position.y,
+                "z": position.z,
+                "role": role
+            }
+            save_teleports(teleports)
+
+            if role:
+                await self.highrise.send_whisper(user.id, t("tele_created_role", name=tele_name, role=role))
+            else:
+                await self.highrise.send_whisper(user.id, t("tele_created", name=tele_name))
+            return
+
+        # --- !delete tele <ad> ---
+        if cmd == "!delete" and len(parts) >= 2 and parts[1].lower() == "tele":
+            if not is_host(user.username):
+                await self.highrise.send_whisper(user.id, t("host_only"))
+                return
+            if len(parts) < 3:
+                await self.highrise.send_whisper(user.id, t("tele_delete_usage"))
+                return
+
+            tele_name = parts[2].strip().lower()
+            teleports = load_teleports()
+
+            actual_key = None
+            for key in teleports:
+                if key.lower() == tele_name:
+                    actual_key = key
+                    break
+
+            if not actual_key:
+                await self.highrise.send_whisper(user.id, t("tele_not_found", name=tele_name))
+                return
+
+            del teleports[actual_key]
+            save_teleports(teleports)
+            await self.highrise.send_whisper(user.id, t("tele_deleted", name=tele_name))
+            return
+
+        # --- !tele @kullanıcı <teleportadı | x y z> ---
+        if cmd == "!tele":
+            if not is_admin_or_above(user.username):
+                await self.highrise.send_whisper(user.id, t("admin_only"))
+                return
+            if len(parts) < 3:
+                await self.highrise.send_whisper(user.id, t("tele_usage"))
+                return
+
+            target_name = parts[1].lstrip("@")
+            rest = parts[2].strip()
+
+            target_user, target_pos = await self._find_room_user(target_name)
+            if not target_user:
+                await self.highrise.send_whisper(user.id, t("tele_user_not_found", target=target_name))
+                return
+
+            # Koordinat kontrolü (x y z) - sadece host
+            coord_parts = rest.split()
+            if len(coord_parts) == 3:
+                try:
+                    x = float(coord_parts[0])
+                    y = float(coord_parts[1])
+                    z = float(coord_parts[2])
+                    if not is_host(user.username):
+                        await self.highrise.send_whisper(user.id, t("tele_coord_host_only"))
+                        return
+                    await self.highrise.teleport(target_user.id, Position(x, y, z))
+                    await self.highrise.send_whisper(user.id, t("tele_user_teleported_coord", target=target_name, x=x, y=y, z=z))
+                    return
+                except ValueError:
+                    pass
+
+            # Teleport noktası adıyla ışınla
+            tele_name = rest.lower()
+            teleports = load_teleports()
+            actual_key = None
+            for key in teleports:
+                if key.lower() == tele_name:
+                    actual_key = key
+                    break
+
+            if not actual_key:
+                await self.highrise.send_whisper(user.id, t("tele_not_found", name=tele_name))
+                return
+
+            tele = teleports[actual_key]
+            await self.highrise.teleport(target_user.id, Position(tele["x"], tele["y"], tele["z"]))
+            await self.highrise.send_whisper(user.id, t("tele_user_teleported", target=target_name, name=actual_key))
+            return
+
+        # --- !tp x y z (host kendini koordinatla ışınlar) ---
+        if cmd == "!tp":
+            if not is_host(user.username):
+                await self.highrise.send_whisper(user.id, t("host_only"))
+                return
+
+            all_parts = msg.split()
+            if len(all_parts) != 4:
+                await self.highrise.send_whisper(user.id, t("tp_usage"))
+                return
+
+            try:
+                x = float(all_parts[1])
+                y = float(all_parts[2])
+                z = float(all_parts[3])
+            except ValueError:
+                await self.highrise.send_whisper(user.id, t("tp_usage"))
+                return
+
+            await self.highrise.teleport(user.id, Position(x, y, z))
+            await self.highrise.send_whisper(user.id, t("tp_teleported", x=x, y=y, z=z))
+            return
+
+        # --- !bot (bot başlangıç noktası ayarla) ---
+        if cmd == "!bot":
+            if not is_host(user.username):
+                await self.highrise.send_whisper(user.id, t("host_only"))
+                return
+
+            all_parts = msg.split()
+            if len(all_parts) == 4:
+                try:
+                    x = float(all_parts[1])
+                    y = float(all_parts[2])
+                    z = float(all_parts[3])
+                except ValueError:
+                    await self.highrise.send_whisper(user.id, t("bot_usage"))
+                    return
+            elif len(all_parts) == 1:
+                position = await self._get_user_position(user.id)
+                if not position:
+                    return
+                x, y, z = position.x, position.y, position.z
+            else:
+                await self.highrise.send_whisper(user.id, t("bot_usage"))
+                return
+
+            settings = load_settings()
+            settings["bot_spawn"] = {"x": x, "y": y, "z": z}
+            save_settings(settings)
+
+            try:
+                await self.highrise.walk_to(Position(x, y, z))
+            except Exception:
+                pass
+
+            await self.highrise.send_whisper(user.id, t("bot_spawn_set", x=x, y=y, z=z))
+            return
 
         # --- !emote komutu ---
         if cmd == "!emote":
